@@ -20,7 +20,10 @@ pub fn build(b: *std.build.Builder) !void {
     exe.setTarget(target);
     exe.setBuildMode(mode);
     exe.install();
-    exe.step.dependOn(&compile_swift.step);
+
+    if (buildNeeded("src/libclip.swift", b.pathJoin(&.{ b.cache_root, "libclip.a" }))) {
+        exe.step.dependOn(&compile_swift.step);
+    }
 
     // zig build run
     const run_cmd = exe.run();
@@ -39,4 +42,15 @@ pub fn build(b: *std.build.Builder) !void {
 
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&exe_tests.step);
+}
+
+fn buildNeeded(source: []const u8, built: []const u8) bool {
+    const sourceFile = std.fs.cwd().openFile(source, .{}) catch unreachable;
+    defer sourceFile.close();
+    const builtFile = std.fs.cwd().openFile(built, .{}) catch return true;
+    defer builtFile.close();
+
+    const sourceFileModified = (sourceFile.metadata() catch return true).modified();
+    const builtFileCreated = (builtFile.metadata() catch return true).created().?;
+    return sourceFileModified > builtFileCreated;
 }
