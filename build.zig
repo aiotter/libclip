@@ -13,17 +13,15 @@ pub fn build(b: *std.build.Builder) !void {
         "libclip.a",
         b.pathFromRoot("src/libclip.swift"),
     });
+    const compile_swift_needed = buildNeeded("src/libclip.swift", b.pathJoin(&.{ b.cache_root, "libclip.a" }));
 
     const exe = b.addExecutable("clip", "src/main.zig");
+    if (compile_swift_needed) exe.step.dependOn(&compile_swift.step);
     exe.addLibraryPath(b.cache_root);
     exe.linkSystemLibrary("clip");
     exe.setTarget(target);
     exe.setBuildMode(mode);
     exe.install();
-
-    if (buildNeeded("src/libclip.swift", b.pathJoin(&.{ b.cache_root, "libclip.a" }))) {
-        exe.step.dependOn(&compile_swift.step);
-    }
 
     // zig build run
     const run_cmd = exe.run();
@@ -37,6 +35,9 @@ pub fn build(b: *std.build.Builder) !void {
 
     // zig build test
     const exe_tests = b.addTest("src/main.zig");
+    if (compile_swift_needed) exe_tests.step.dependOn(&compile_swift.step);
+    exe_tests.addLibraryPath(b.cache_root);
+    exe_tests.linkSystemLibrary("clip");
     exe_tests.setTarget(target);
     exe_tests.setBuildMode(mode);
 

@@ -28,7 +28,7 @@ public func getPasteSize(dataTypeName: UnsafePointer<UInt8>) -> UInt64 {
 @_cdecl("getTypes")
 public func getTypes(buffer: UnsafeMutableRawPointer) -> UInt32 {
     let pasteboard: NSPasteboard = .general
-    let str: String = pasteboard.types?.map({ $0.rawValue + "\n" }).joined(separator: "") ?? ""
+    let str: String = pasteboard.types?.map({ $0.rawValue }).joined(separator: "\0") ?? ""
     let count = Array(str.utf8).copyBytes(to: UnsafeMutableRawBufferPointer.init(start: buffer, count: str.count))
     return UInt32(count)
 }
@@ -36,5 +36,6 @@ public func getTypes(buffer: UnsafeMutableRawPointer) -> UInt32 {
 @_cdecl("getTypesBufferSize")
 public func getTypesBufferSize() -> UInt32 {
     let pasteboard: NSPasteboard = .general
-    return UInt32(pasteboard.types?.reduce(1, { x, y in x + y.rawValue.count + 1 }) ?? 0)
+    let size = (pasteboard.types?.reduce(0, { x, y in x + y.rawValue.count }) ?? 0) + (pasteboard.types?.count ?? 1) - 1
+    return UInt32(size)
 }
