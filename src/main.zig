@@ -1,9 +1,9 @@
 const std = @import("std");
 
-extern "pasteboard" fn pasteAs(dataTypeName: [*:0]const u8, buffer: [*]const u8) u64;
-extern "pasteboard" fn getPasteSize(dataTypeName: [*:0]const u8) u64;
-extern "pasteboard" fn getTypes(buffer: [*]const u8) u32;
-extern "pasteboard" fn getTypesBufferSize() u32;
+extern "clip" fn pasteAs(dataTypeName: [*:0]const u8, buffer: [*]const u8) u64;
+extern "clip" fn getPasteSize(dataTypeName: [*:0]const u8) u64;
+extern "clip" fn getTypes(buffer: [*]const u8) u32;
+extern "clip" fn getTypesBufferSize() u32;
 
 pub fn main() anyerror!void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);

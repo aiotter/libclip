@@ -4,11 +4,19 @@ pub fn build(b: *std.build.Builder) !void {
     const target = b.standardTargetOptions(.{});
     const mode = b.standardReleaseOptions();
 
-    const compile_swift = b.addSystemCommand(&[_][]const u8{ "swiftc", "-working-directory", b.cache_root, "-emit-library", "-o", "libpasteboard.a", b.pathFromRoot("src/libpasteboard.swift") });
+    const compile_swift = b.addSystemCommand(&[_][]const u8{
+        "swiftc",
+        "-working-directory",
+        b.cache_root,
+        "-emit-library",
+        "-o",
+        "libclip.a",
+        b.pathFromRoot("src/libclip.swift"),
+    });
 
     const exe = b.addExecutable("clip", "src/main.zig");
     exe.addLibraryPath(b.cache_root);
-    exe.linkSystemLibrary("pasteboard");
+    exe.linkSystemLibrary("clip");
     exe.setTarget(target);
     exe.setBuildMode(mode);
     exe.install();
